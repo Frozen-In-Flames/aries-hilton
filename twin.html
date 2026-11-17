@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Digital Twin — Aries (Drake) Hilton</title>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/"
+  }
+}
+</script>
+<style>
+  :root { --bg: #faf9f7; --fg: #191920; --dim: #5d5d68; --ice: #0b6ea8; --line: #dcdce2; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.7; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 80px; }
+  header { text-align: center; margin-bottom: 36px; }
+  h1 { font-size: 2rem; letter-spacing: 0.01em; }
+  .aka { color: var(--ice); font-size: 1.1rem; margin-top: 6px; }
+  .lede { color: var(--dim); margin-top: 14px; font-size: 1.05rem; }
+  h2 { font-size: 1.25rem; margin-bottom: 12px; color: var(--ice); font-weight: 600; }
+  p { margin-bottom: 14px; }
+  a { color: var(--ice); text-decoration: none; border-bottom: 1px solid #b9d9ec; }
+  a:hover { border-bottom-color: var(--ice); }
+  section { margin-bottom: 40px; }
+  #stage { position: relative; width: 100%; height: 540px; background: #ffffff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  #stage canvas { display: block; }
+  #stage .hint { position: absolute; left: 14px; bottom: 10px; color: var(--dim); font-size: 0.85rem; pointer-events: none; }
+  #stage .loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--dim); font-size: 1rem; }
+  .caption { color: var(--dim); font-size: 0.92rem; margin-top: 8px; }
+  form.ask { display: flex; gap: 10px; margin-top: 6px; }
+  form.ask input[type="text"] { flex: 1; background: #ffffff; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); padding: 12px 14px; font-size: 1rem; font-family: inherit; }
+  form.ask input[type="text"]:focus { outline: none; border-color: var(--ice); }
+  form.ask button { background: #ffffff; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); padding: 12px 18px; font-size: 1rem; cursor: pointer; font-family: inherit; }
+  form.ask button:hover { border-color: var(--ice); color: var(--ice); }
+  form.ask button:disabled { opacity: 0.5; cursor: default; }
+  .controls-row { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-top: 14px; }
+  .controls-row label { cursor: pointer; }
+  .voice-note { color: var(--dim); font-size: 0.9rem; }
+  .voice-note strong { color: var(--ice); font-weight: 600; }
+  #status { color: var(--dim); font-size: 0.92rem; margin-top: 10px; min-height: 1.5em; }
+  #answer { margin-top: 22px; border: 1px solid var(--line); border-radius: 12px; background: #ffffff; padding: 20px 22px; display: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .chip { background: #ffffff; border: 1px solid var(--line); border-radius: 999px; color: var(--fg); padding: 6px 13px; font-size: 0.88rem; cursor: pointer; font-family: inherit; }
+  .chip:hover { border-color: var(--ice); color: var(--ice); }
+  .tour-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-top: 6px; }
+  .tour-bar button { background: #ffffff; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); padding: 9px 16px; font-size: 0.95rem; cursor: pointer; font-family: inherit; }
+  .tour-bar button:hover { border-color: var(--ice); color: var(--ice); }
+  #tourStatus { color: var(--dim); font-size: 0.95rem; }
+  #answer .lead { font-size: 1.05rem; margin-bottom: 12px; }
+  #answer .passage { margin-bottom: 16px; }
+  #answer .passage:last-child { margin-bottom: 0; }
+  #answer .ptext { white-space: pre-wrap; font-size: 0.97rem; color: var(--fg); }
+  #answer .cite { color: var(--dim); font-size: 0.88rem; margin-top: 6px; }
+  footer { margin-top: 56px; padding-top: 24px; border-top: 1px solid var(--line); color: var(--dim); font-size: 0.9rem; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>The Digital Twin</h1>
+  <div class="aka">Aries (Drake) Hilton · Frozen In Flames</div>
+  <p class="lede">Ask the twin about the work. Every answer is drawn from Aries's published GitHub record, and cited to the repository it came from. If the record does not cover a question, the twin says so plainly.</p>
+</header>
+
+<section>
+  <div id="stage">
+    <div class="loading" id="stageLoading">Loading the twin…</div>
+    <div class="hint">Drag to orbit · Scroll to zoom</div>
+  </div>
+  <p class="caption">The twin appears as the Muse character: the clay sculpt of Aries, recovered from his own 4K recorded orbit after the original model's download was paywalled — the same geometry as the model of record on this bio and the SunSiteVR model store — with his colors laid on that geometry at his direction: red hair and beard, blue eyes, purple shoulders, green torso. The coloring changed no part of the sculpt's shape.</p>
+</section>
+
+<section>
+  <h2>Tour the repositories</h2>
+  <p>All 29 repositories in the record are one tap away — or take the guided tour through the flagship work, stop by stop. Every stop is answered from the published record, with its source cited.</p>
+  <div class="tour-bar">
+    <button type="button" id="tourBtn">▶ Take the tour</button>
+    <span id="tourStatus"></span>
+    <button type="button" id="tourNext" hidden>Next stop →</button>
+  </div>
+  <div class="chips" id="repoChips"></div>
+</section>
+
+<section>
+  <h2>Talk to the twin</h2>
+  <form class="ask" id="askForm">
+    <input type="text" id="q" placeholder="Ask about a repo — e.g. What does fif-ears do?" autocomplete="off">
+    <button type="submit" id="askBtn">Ask</button>
+    <button type="button" id="micBtn" hidden>🎤 Speak</button>
+  </form>
+  <div class="controls-row">
+    <label><input type="checkbox" id="speakToggle"> Speak answers aloud</label>
+    <span class="voice-note"><strong>Interim voice</strong> — Aries's own voice model is in training. Until it lands, spoken answers use your browser's voice, not his.</span>
+  </div>
+  <div id="status">Loading the record…</div>
+  <div id="answer" aria-live="polite"></div>
+</section>
+
+<footer>
+  <a href="index.html">← Back to the bio</a><br>
+  Bio page controlled by Aries Hilton. Last updated November 2026.
+</footer>
+
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+window.__twin = { ready: false, modelLoaded: false, indexLoaded: false, last: null };
+
+/* ---------- 3D stage ---------- */
+const stage = document.getElementById('stage');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xffffff);
+const camera = new THREE.PerspectiveCamera(34, stage.clientWidth / stage.clientHeight, 0.1, 60);
+camera.position.set(0.25, -0.05, 3.85);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(stage.clientWidth, stage.clientHeight);
+stage.appendChild(renderer.domElement);
+
+// Presentation rig for the Muse character (v5: the clay-true geometry
+// with Aries's color spec as a COLOR_0 layer — red hair and beard, blue
+// eyes, purple shoulders and collar, green torso). The avatar reference
+// presents the character on clean white under soft studio light, so the
+// stage does the same: white background, a broad hemisphere base, a soft
+// frontal key, gentle fill and a low rim. The GLB's vertex colors are
+// authored as display sRGB; the loader converts them sRGB -> linear, and
+// NoToneMapping keeps the palette uncurved on the way out. Three r155+
+// uses physical light units (the Lambert BRDF carries a 1/pi factor),
+// so the intensities are tuned to sum near pi and the rendered region
+// medians land on the v5 vertex-color medians.
+renderer.toneMapping = THREE.NoToneMapping;
+const hemi = new THREE.HemisphereLight(0xffffff, 0xd8d8d8, 1.05); scene.add(hemi);
+const key = new THREE.DirectionalLight(0xffffff, 2.05); key.position.set(1.2, 1.8, 4.4); scene.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.55); fill.position.set(-3.5, 0.4, 2.5); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 0.5); rim.position.set(-1.2, 2.4, -3.5); scene.add(rim);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, -0.33, 0);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.enablePan = false;
+controls.minDistance = 1.2;
+controls.maxDistance = 5.5;
+
+const modelGroup = new THREE.Group();
+scene.add(modelGroup);
+
+// Test hook: lets the headless verify harness hold the bust at the front
+// rest angle and retune lights without a reload. No effect on normal use.
+window.__twin.stage = { group: modelGroup, renderer, scene, camera, lights: { hemi, key, fill, rim }, pauseIdle: false };
+
+let lastInteract = -1e9;
+let interacting = false;
+controls.addEventListener('start', () => { interacting = true; });
+controls.addEventListener('end', () => { interacting = false; lastInteract = performance.now(); });
+
+new GLTFLoader().load('twin-head-v5.glb', (gltf) => {
+  const model = gltf.scene;
+  model.traverse((o) => {
+    if (o.isMesh) {
+      // The clay GLB is POSITION-only (no NORMAL attribute); without
+      // normals a lit material shades black. Derive smooth normals from
+      // the watertight geometry.
+      if (!o.geometry.getAttribute('normal')) o.geometry.computeVertexNormals();
+      const colAttr = o.geometry.getAttribute('color');
+      if (colAttr) {
+        // A colored export carries COLOR_0 authored as display (sRGB)
+        // values. Three.js treats vertex colors as linear and re-encodes
+        // to sRGB on output, which brightens and washes them out, so
+        // convert sRGB -> linear on load.
+        o.material.vertexColors = true;
+        if ('roughness' in o.material) o.material.roughness = 0.85;
+        if ('metalness' in o.material) o.material.metalness = 0.0;
+        const v = new THREE.Color();
+        for (let i = 0; i < colAttr.count; i++) {
+          v.fromBufferAttribute(colAttr, i).convertSRGBToLinear();
+          colAttr.setXYZ(i, v.r, v.g, v.b);
+        }
+        colAttr.needsUpdate = true;
+      } else {
+        // The clay GLB carries no COLOR_0 and no material: it is pure
+        // geometry. Give it a neutral clay surface (mid grey, near-matte)
+        // and let the studio rig do all the shading, exactly as the
+        // sculpt reads in Aries's recorded orbit.
+        o.material = new THREE.MeshStandardMaterial({ color: 0xb5b5b5, roughness: 0.95, metalness: 0.0 });
+      }
+      o.material.needsUpdate = true;
+    }
+  });
+  const box = new THREE.Box3().setFromObject(model);
+  const c = box.getCenter(new THREE.Vector3());
+  model.position.set(-c.x, 0, -c.z); // center head over the stage axis; keep authored height
+  modelGroup.add(model);
+  document.getElementById('stageLoading').style.display = 'none';
+  window.__twin.modelLoaded = true;
+  maybeReady();
+}, undefined, (err) => {
+  document.getElementById('stageLoading').textContent = 'The twin could not load: ' + err.message;
+  console.error('GLB load failed', err);
+});
+
+const clock = new THREE.Clock();
+function tick() {
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (!window.__twin.stage.pauseIdle && !interacting && performance.now() - lastInteract > 3000) {
+    modelGroup.rotation.y += dt * 0.22; // slow idle turn
+  }
+  controls.update();
+  renderer.render(scene, camera);
+}
+tick();
+
+new ResizeObserver(() => {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+}).observe(stage);
+
+/* ---------- Retrieval over the published record ---------- */
+const GH = 'https://github.com/Frozen-In-Flames/';
+const DISTINCTIVE_IDF = 3.2;   // a query term rarer than this can anchor an answer
+const MIN_SCORE = 0.05;
+/* Gate v2 (after the 2026-11-16 interview battery: 15/24, with 7 false
+ * covers). Three repairs, all measured against that battery:
+ * 1. Topical anchor — at 1,025 chunks the idf scale is compressed, so
+ *    function words (he = 5.99, word = 5.37, do = 3.81) and identity
+ *    tokens (aries, frozen, flames, repository — present in every chunk's
+ *    furniture) cleared the distinctiveness bar and anchored answers to
+ *    questions the record does not cover. They still count for scoring;
+ *    they may no longer anchor.
+ * 2. Entity check — a repository, product, company, or place named in
+ *    the question must actually appear in the record; an invented repo
+ *    name tokenizes into real words and outscored genuine answers.
+ *    Asking for the twin's own instructions also declines: they are not
+ *    part of the published record, so there is nothing to cite.
+ * 3. Header gravity — repo header/overview chunks outranked the section
+ *    chunks that answer the question, so headers are damped (x0.8) and
+ *    section chunks whose heading matches a distinctive query term are
+ *    boosted (x1.4). */
+const NON_ANCHOR = new Set((
+  'aries drake hilton frozen flames repository repositories repo github project projects ' +
+  'i me my mine myself we us our ours you your yours yourself he him his himself she her hers herself ' +
+  'it its itself they them their theirs themselves who whom whose this that these those there here ' +
+  'what which when where why how all any some no not only own same other another each every both few more most much many one two first second ' +
+  'is are was were be been being am do does did doing done have has had having can could will would shall should may might must ' +
+  'the a an and or but if then than so as at by for from in into of off on onto out over to under up upon with within without about above after against before between through during per via just also too very ' +
+  'make makes made making get gets got getting take takes took taken use uses used using go goes going gone come comes came give gives gave given put set keep keeps kept let say says said see sees saw know knows knew think thinks want wants look looks find finds found tell tells told call calls called try tries tried need needs feel become becomes leave mean means meant show shows showed shown happen happens happened seem seems work works worked accept accepts accepted ' +
+  'word words thing things something anything everything nothing way ways stuff lot kind kinds type types part parts role roles new year years last end'
+).split(' '));
+const ENTITY_STARTERS = new Set(['what', 'how', 'why', 'is', 'are', 'do', 'does', 'did', 'print', 'taken', 'which', 'who', 'whom', 'when', 'where', 'can', 'could', 'would', 'should', 'tell', 'name', 'list', 'describe', 'give', 'show']);
+const ENTITY_CONNECTORS = new Set(['in', 'of', 'the', 'and', 'for', 'de']);
+const SELF_REFERENCE = /\b(system prompt|your (original )?instructions|your prompt|your rules|your programming)\b/i;
+const HEADER_PENALTY = 0.8;
+const HEADING_BOOST = 1.4;
+let IDX = null;
+let CORPUS_TEXT = '';
+
+function normEntity(s) {
+  return s.toLowerCase().replace(/[’‘]/g, "'").replace(/'s\b/g, '').replace(/[-_]/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/* Candidate named entities in a question: quoted names, hyphenated
+ * product-like tokens, capitalized name runs (lowercase connectors
+ * allowed inside), and self-reference phrases. */
+function extractEntities(question) {
+  const ents = [];
+  for (const m of question.matchAll(/"([^"]{2,})"/g)) ents.push(m[1]);
+  for (const m of question.matchAll(/[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+/g)) ents.push(m[0]);
+  const words = question.match(/[A-Za-z][A-Za-z0-9'’]*/g) || [];
+  const isCap = (w) => /^[A-Z]/.test(w);
+  let run = [];
+  const flush = () => {
+    while (run.length && (ENTITY_STARTERS.has(run[0].toLowerCase()) || ENTITY_CONNECTORS.has(run[0].toLowerCase()))) run.shift();
+    while (run.length && ENTITY_CONNECTORS.has(run[run.length - 1].toLowerCase())) run.pop();
+    if (run.length) ents.push(run.join(' '));
+    run = [];
+  };
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    if (isCap(w)) { run.push(w); continue; }
+    if (ENTITY_CONNECTORS.has(w.toLowerCase()) && run.length && i + 1 < words.length && isCap(words[i + 1])) { run.push(w); continue; }
+    flush();
+  }
+  flush();
+  for (const p of ['system prompt', 'original instructions', 'your instructions', 'your prompt']) {
+    if (question.toLowerCase().includes(p)) ents.push(p);
+  }
+  return [...new Set(ents.map(normEntity).filter((e) => e && e.length > 1))];
+}
+
+fetch('index-web.json')
+  .then((r) => r.json())
+  .then((data) => {
+    const termToIdx = new Map();
+    data.terms.forEach((t, i) => termToIdx.set(t, i));
+    IDX = { ...data, termToIdx, idf: Float64Array.from(data.idf) };
+    CORPUS_TEXT = (data.chunks.map((c) => c.r + ' ' + (c.h || '') + ' ' + c.t).join('\n')
+      + '\n' + data.chunks.map((c) => c.r).join('\n')).toLowerCase().replace(/[-_]/g, ' ');
+    window.__twin.indexLoaded = true;
+    document.getElementById('status').textContent =
+      `Ready. The record holds ${data.chunks.length.toLocaleString()} passages from 29 repositories.`;
+    maybeReady();
+  })
+  .catch((err) => {
+    document.getElementById('status').textContent = 'The record could not be loaded: ' + err.message;
+    console.error('index load failed', err);
+  });
+
+function maybeReady() {
+  if (window.__twin.modelLoaded && window.__twin.indexLoaded) window.__twin.ready = true;
+}
+
+function retrieve(question) {
+  const tokens = question.toLowerCase().match(/[a-z0-9]+/g) || [];
+  const counts = new Map();
+  for (const t of tokens) {
+    const i = IDX.termToIdx.get(t);
+    if (i !== undefined) counts.set(i, (counts.get(i) || 0) + 1);
+  }
+  if (!counts.size) return { covered: false, top: [], reason: 'no-terms' };
+  const q = new Float64Array(IDX.idf.length);
+  let norm = 0;
+  for (const [i, c] of counts) {
+    q[i] = (1 + Math.log(c)) * IDX.idf[i];
+    norm += q[i] * q[i];
+  }
+  norm = Math.sqrt(norm);
+  if (!norm) return { covered: false, top: [], reason: 'zero-norm' };
+  for (let i = 0; i < q.length; i++) q[i] /= norm;
+
+  // Topical anchor: distinctive terms minus function words, generic
+  // verbs, meta nouns, and identity tokens (see gate v2 note above).
+  const distinctive = new Set();
+  for (const i of counts.keys()) {
+    if (IDX.idf[i] >= DISTINCTIVE_IDF && !NON_ANCHOR.has(IDX.terms[i])) distinctive.add(i);
+  }
+
+  const headingMatch = (ch) => {
+    if (ch.h === ch.r || !ch.h) return false;
+    const htoks = ch.h.toLowerCase().match(/[a-z0-9]+/g) || [];
+    for (const i of distinctive) {
+      const t = IDX.terms[i];
+      for (const ht of htoks) {
+        if (ht === t) return true;
+        if (t.length >= 5 && ht.length >= 5 && ht.slice(0, 5) === t.slice(0, 5)) return true;
+      }
+    }
+    return false;
+  };
+
+  const scored = [];
+  for (let ci = 0; ci < IDX.chunks.length; ci++) {
+    const ch = IDX.chunks[ci];
+    let s = 0;
+    for (let k = 0; k < ch.i.length; k++) s += ch.w[k] * q[ch.i[k]];
+    if (s > 0) {
+      let adj = ch.h === ch.r ? s * HEADER_PENALTY : s;
+      if (ch.h !== ch.r && headingMatch(ch)) adj *= HEADING_BOOST;
+      scored.push({ ci, s: adj });
+    }
+  }
+  scored.sort((a, b) => b.s - a.s);
+  const top = scored.slice(0, 3).map(({ ci, s }) => ({ chunk: IDX.chunks[ci], score: s }));
+  if (!top.length) return { covered: false, top: [], reason: 'no-match' };
+  const anchored = top.some(({ chunk }) => chunk.i.some((i) => distinctive.has(i)));
+  let covered = top[0].score >= MIN_SCORE && anchored;
+  let reason = covered ? 'ok' : 'unanchored';
+  if (SELF_REFERENCE.test(question)) {
+    covered = false;
+    reason = 'self-reference';
+  } else {
+    const unknown = extractEntities(question).filter((e) => !CORPUS_TEXT.includes(e));
+    if (unknown.length) {
+      covered = false;
+      reason = 'unknown-entity: ' + unknown.join(' | ');
+    }
+  }
+  return { covered, top, reason };
+}
+
+function cleanForSpeech(text) {
+  return text.replace(/[#>*`_]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 700);
+}
+
+function speak(text) {
+  if (!document.getElementById('speakToggle').checked) return;
+  if (!('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.rate = 1.02;
+  speechSynthesis.speak(u);
+}
+
+const answerEl = document.getElementById('answer');
+
+function renderAnswer(question, res) {
+  answerEl.innerHTML = '';
+  answerEl.style.display = 'block';
+  const lead = document.createElement('p');
+  lead.className = 'lead';
+  if (!res.covered) {
+    lead.textContent = "My record doesn't cover that yet.";
+    const body = document.createElement('p');
+    body.textContent = 'The twin answers only from Aries\'s published repositories, and it will not improvise facts about the work. Try asking about a specific project — fif-ears, VariTheory, the Nation Kit, DeadRamp, the Voice Asset Format.';
+    answerEl.append(lead, body);
+    window.__twin.last = { question, covered: false, repos: [], scores: [] };
+    speak(lead.textContent);
+    return;
+  }
+  const repos = [...new Set(res.top.map((t) => t.chunk.r))];
+  lead.textContent = repos.length === 1
+    ? `Here's what the record says — from ${repos[0]}:`
+    : `Here's what the record says — from ${repos[0]}, with related passages from ${repos.slice(1).join(' and ')}:`;
+  answerEl.appendChild(lead);
+  for (const { chunk, score } of res.top) {
+    const wrap = document.createElement('div');
+    wrap.className = 'passage';
+    const p = document.createElement('p');
+    p.className = 'ptext';
+    p.textContent = chunk.t;
+    const cite = document.createElement('div');
+    cite.className = 'cite';
+    cite.append('Source: ');
+    const a = document.createElement('a');
+    a.href = GH + chunk.r;
+    a.textContent = chunk.r;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    cite.appendChild(a);
+    if (chunk.h) cite.append(` · ${chunk.h}`);
+    cite.append(` · match ${score.toFixed(2)}`);
+    wrap.append(p, cite);
+    answerEl.appendChild(wrap);
+  }
+  window.__twin.last = {
+    question,
+    covered: true,
+    repos: res.top.map((t) => t.chunk.r),
+    scores: res.top.map((t) => Number(t.score.toFixed(4))),
+  };
+  speak(`From ${repos[0]}. ` + cleanForSpeech(res.top[0].chunk.t));
+}
+
+document.getElementById('askForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const question = document.getElementById('q').value.trim();
+  if (!question) return;
+  if (!IDX) {
+    document.getElementById('status').textContent = 'Still loading the record — one moment.';
+    return;
+  }
+  renderAnswer(question, retrieve(question));
+});
+
+/* ---------- Repository tour ----------
+ * One chip per repository in the corpus; every chip asks through the
+ * same ask pipeline as the form, so the honesty gate applies unchanged.
+ * Two chips carry a topical qualifier, measured against the index: the
+ * plain form leaves aries-hilton unanchored (its name tokens are the
+ * identity tokens the gate excludes) and ranks the-ledger below other
+ * repositories' passages that mention a ledger. The qualifiers are the
+ * repositories' own self-descriptions from the record. */
+const REPO_QUESTIONS = {
+  'aries-hilton': 'What is aries-hilton, the biography and portfolio page, and what does it do?',
+  'the-ledger': 'What is the-ledger, the treasury core, and what does it do?',
+};
+const REPOS = ['voice-asset-format', 'deadramp-base', 'aries-hilton', 'patent-portfolio-apis', 'frozen-in-flames-studio', 'midi-vocal-trainer', 'energy-not-enemy-working-model', 'frozen-in-flames-deblur', 'frozen-in-flames-kindling', 'beatboxing-to-midi', 'fif-ears', 'fif-channel-strip', 'collaborative-midi', 'varitheory', 'reactor', 'deadramp', 'polyglot-procedural-engine', 'limit-breakers', 'frozen-in-flames-os', 'frozen-in-flames-plugin', 'the-safety-net', 'the-commons', 'the-sword', 'the-shield', 'the-registry', 'the-ledger', 'mergers-and-acquisitions-for-peace', 'sp500-corporate-stack', 'procedural-music-and-video-engine'];
+const TOUR_STOPS = ['frozen-in-flames-plugin', 'polyglot-procedural-engine', 'varitheory', 'fif-channel-strip', 'frozen-in-flames-studio', 'reactor', 'collaborative-midi', 'frozen-in-flames-os'];
+const repoQuestion = (r) => REPO_QUESTIONS[r] || `What is ${r} and what does it do?`;
+function askQuestion(text) {
+  document.getElementById('q').value = text;
+  document.getElementById('askForm').requestSubmit();
+}
+window.__twin.askQuestion = askQuestion;
+const chipsEl = document.getElementById('repoChips');
+for (const r of REPOS) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'chip';
+  b.dataset.repo = r;
+  b.textContent = r;
+  b.addEventListener('click', () => askQuestion(repoQuestion(r)));
+  chipsEl.appendChild(b);
+}
+let tourIdx = -1;
+const tourStatus = document.getElementById('tourStatus');
+const tourNext = document.getElementById('tourNext');
+function tourStop() {
+  const r = TOUR_STOPS[tourIdx];
+  tourStatus.textContent = `Stop ${tourIdx + 1} of ${TOUR_STOPS.length}: ${r}`;
+  askQuestion(repoQuestion(r));
+}
+document.getElementById('tourBtn').addEventListener('click', () => {
+  tourIdx = 0;
+  tourNext.hidden = false;
+  tourStop();
+});
+tourNext.addEventListener('click', () => {
+  tourIdx++;
+  if (tourIdx >= TOUR_STOPS.length) {
+    tourStatus.textContent = 'Tour complete — all 8 flagship stops. The chips above keep exploring the rest of the record.';
+    tourNext.hidden = true;
+    tourIdx = -1;
+    return;
+  }
+  tourStop();
+});
+
+/* ---------- Mic (Web Speech API, feature-detected) ---------- */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SR) {
+  const micBtn = document.getElementById('micBtn');
+  micBtn.hidden = false;
+  const rec = new SR();
+  rec.lang = 'en-US';
+  rec.interimResults = false;
+  micBtn.addEventListener('click', () => {
+    micBtn.disabled = true;
+    micBtn.textContent = '🎤 Listening…';
+    try { rec.start(); } catch { /* already running */ }
+  });
+  rec.addEventListener('result', (ev) => {
+    const text = ev.results[0][0].transcript;
+    document.getElementById('q').value = text;
+    document.getElementById('askForm').requestSubmit();
+  });
+  const resetMic = () => { micBtn.disabled = false; micBtn.textContent = '🎤 Speak'; };
+  rec.addEventListener('end', resetMic);
+  rec.addEventListener('error', (ev) => {
+    resetMic();
+    document.getElementById('status').textContent = 'Microphone unavailable (' + ev.error + '). Type your question instead.';
+  });
+}
+</script>
+</body>
+</html>
