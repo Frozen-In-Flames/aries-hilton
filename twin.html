@@ -31,6 +31,9 @@
   #stage .hint { position: absolute; left: 14px; bottom: 10px; color: var(--dim); font-size: 0.85rem; pointer-events: none; }
   #stage .loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--dim); font-size: 1rem; }
   .caption { color: var(--dim); font-size: 0.92rem; margin-top: 8px; }
+  .versions { margin-top: 28px; text-align: left; }
+  .versions ul { margin: 12px 0 0 20px; }
+  .versions li { margin-bottom: 10px; }
   form.ask { display: flex; gap: 10px; margin-top: 6px; }
   form.ask input[type="text"] { flex: 1; background: #ffffff; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); padding: 12px 14px; font-size: 1rem; font-family: inherit; }
   form.ask input[type="text"]:focus { outline: none; border-color: var(--ice); }
@@ -72,7 +75,18 @@
     <div class="loading" id="stageLoading">Loading the twin…</div>
     <div class="hint">Drag to orbit · Scroll to zoom</div>
   </div>
-  <p class="caption">The twin appears as the Muse character: the clay sculpt of Aries, recovered from his own 4K recorded orbit after the original model's download was paywalled — the same geometry as the model of record on this bio and the SunSiteVR model store — with his colors laid on that geometry at his direction: red hair and beard, blue eyes, purple shoulders, green torso. The coloring changed no part of the sculpt's shape.</p>
+  <p class="caption">The twin is a three dimensional likeness of Aries Hilton, reconstructed from a 360 degree recorded orbit of a clay sculpt of him. The sculpt supplies the geometry. Colour was applied to that geometry at his direction: red hair and beard, blue eyes, purple shoulders, green torso. Colour moves no vertex. The likeness is a reconstruction, measured at 0.895 mean silhouette agreement with the recorded orbit, and is not claimed as exact.</p>
+  <section class="versions">
+    <h2>Version history</h2>
+    <p>The twin is rebuilt in the open. Each version below states what changed and what was measured.</p>
+    <ul>
+      <li><strong>v1, November 2026.</strong> First reconstruction of the head from the recorded orbit of the clay sculpt. Silhouette agreement with the orbit was the baseline every later version is measured against.</li>
+      <li><strong>v2, November 2026.</strong> Refined carve. Mean silhouette agreement 0.886 across views; weakest single view 0.700.</li>
+      <li><strong>v3, November 2026.</strong> Fine carve at 71,524 vertices, about 3.3 times the geometry density of v1, with brow, eye recess, and nose form restored. Mean silhouette agreement 0.895; weakest single view 0.835. Teeth, hair strands, beard curls, and the fade remain painted texture in the source recording, finer than the mesh the recording can support.</li>
+      <li><strong>v4, November 2026.</strong> Colour applied to the v3 geometry at Aries's direction: red hair and beard, blue eyes. No vertex moved.</li>
+      <li><strong>v5, November 2026.</strong> Current version. Presentation colours completed: purple shoulders, green torso, on the same v3 geometry. No vertex moved.</li>
+    </ul>
+  </section>
 </section>
 
 <section>
